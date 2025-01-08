@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///task.db'
@@ -62,6 +63,11 @@ def delete(sno):
 
 
 if __name__=="__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    is_production=os.getenv("FLASK_ENV")=="production"
+    app.run(
+        debug=not is_production, 
+        host='0.0.0.0' if is_production else '127.0.0.1', 
+        port=5000
+        )
 
 
