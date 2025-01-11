@@ -14,7 +14,7 @@
 {% block body %}
     <div class="container my-3">
         <h2>Add a high priority task here:</h2>
-        <form action="/" method="POST">
+        <form action="/add" method="POST">
             <div class="mb-3">
               <label for="title" class="form-label">Task Title</label>
               <input type="text" class="form-control" name="title" id="title" aria-describedby="emailHelp">
@@ -22,6 +22,14 @@
             <div class="mb-3">
               <label for="desc" class="form-label">Task Description</label>
               <input type="text" class="form-control" name="desc" id="desc">
+            </div>
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" name="username" id="username">
+            </div>
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input type="password" class="form-control" name="password" id="password">
             </div>
             <button type="submit" class="btn btn-dark">Submit</button>
         </form>

@@ -1,13 +1,38 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from functools import wraps
 import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///task.db'
 db=SQLAlchemy(app)
 
+#Authentication setup
+def check_auth(username,password):
+    stored_username="babu" 
+    stored_password="babu123"
+    return username==stored_username and password==stored_password
+def authenticate():
+    return jsonify({"Error":"Authentication required"}),401
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth=request.authorization
+        if not auth:
+            #fallback to form data for authentication
+            username=request.form.get('username')
+            password=request.form.get('password')
+            if not username or not password or not check_auth(username,password):
+                return authenticate()
+        else:
+            # validate using authorization headers
+            if not check_auth(auth.username, auth.password):
+                return authenticate()
+        return f(*args, **kwargs)
+    return decorated
 
+#Database Model
 class Todo(db.Model):
     sno= db.Column(db.Integer, primary_key=True)
     title=db.Column(db.String(200), nullable=False)
@@ -17,29 +42,39 @@ class Todo(db.Model):
     def __repr__(self)-> str:
         return f"{self.sno} - {self.title}"
 
+#Different Routes
+@app.route("/", methods=['GET'])
+def home():
+    allTodo=Todo.query.all()
+    return render_template('index.html', allTodo=allTodo)
 
-@app.route("/", methods=['GET', 'POST'])
-def hello_world():
-    if request.method=='POST':
+@app.route("/add", methods=['POST'])
+@requires_auth # restrict post access to authntic users.
+def add_task():
+    #if request.method=='POST':
         #print("post kaam kar raha he")
         #print(request.form['title']) #to check if our requests work.
-        title=request.form['title']
-        desc=request.form['desc']
+    title=request.form['title']
+    desc=request.form['desc']
 
-        todo=Todo(title=title,desc=desc)
-        db.session.add(todo)
-        db.session.commit()
-    allTodo=Todo.query.all()
-    return render_template('index.html',allTodo=allTodo)
+    todo=Todo(title=title,desc=desc)
+    db.session.add(todo)
+    db.session.commit()
+    return redirect('/')
+    #allTodo=Todo.query.all()
+    #return render_template('index.html',allTodo=allTodo)
     #return "<p>Hello, World!</p>"
-
+#keeping it for any future potential use such as use of JSON output , API developement and other uses.
 @app.route("/show")
+@requires_auth
 def show():
     allTodo=Todo.query.all()
-    print(allTodo)
-    return "<p>You've landed on the alltodo page!</p>"
+    #print(allTodo)
+    #return "<p>You've landed on the alltodo page!</p>"
+    return jsonify([{"sno": todo.sno, "title": todo.title, "desc": todo.desc} for todo in allTodo])
 
 @app.route("/update/<int:sno>",methods=['GET', 'POST'])
+@requires_auth
 def update(sno):
     if request.method=='POST':
         title=request.form['title']
@@ -55,6 +90,7 @@ def update(sno):
     return render_template('update.html',todo=todo)
 
 @app.route("/delete/<int:sno>")
+@requires_auth
 def delete(sno):
     todo=Todo.query.filter_by(sno=sno).first()
     db.session.delete(todo)
