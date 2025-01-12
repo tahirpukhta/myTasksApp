@@ -59,6 +59,7 @@ def login():
         password=request.form['password']
         if check_auth(username,password):
             session['logged_in']=True
+            session['username']=username #we are storing username in the session to greet user on the my_goals page. 
             flash("Login successful!","success")
             return redirect(url_for('home'))
         else:
@@ -70,6 +71,12 @@ def logout():
     session.pop('logged_in',None)
     flash("Logged out successfully!", "success")
     return redirect(url_for('login'))
+
+@app.route("/my_goals")
+@requires_auth  # Ensure the user is authenticated
+def my_goals():
+    username = session.get('username', 'User')  # Get the username from the session, default to 'User'
+    return render_template('my_goals.html', username=username)
 
 @app.route("/add", methods=['POST'])
 @requires_auth # restrict post access to authntic users.
