@@ -47,6 +47,10 @@ class Todo(db.Model):
         return f"{self.sno} - {self.title}"
 
 #Different Routes
+@app.route("/about")
+def about():
+    return render_template('about.html')
+
 @app.route("/")
 def home():
     allTodo=Todo.query.all()
