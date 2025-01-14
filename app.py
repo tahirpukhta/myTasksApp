@@ -49,7 +49,8 @@ class Todo(db.Model):
 #Different Routes
 @app.route("/home")
 def home():
-    return render_template('home.html')
+    allTodo=Todo.query.all()
+    return render_template('home.html',allTodo=allTodo)
 
 @app.route("/")
 def welcome():
