@@ -48,14 +48,16 @@ class Todo(db.Model):
 
 #Different Routes
 @app.route("/home")
+@requires_auth
 def home():
     allTodo=Todo.query.all()
     return render_template('home.html',allTodo=allTodo)
 
 @app.route("/")
 def welcome():
-    allTodo=Todo.query.all()
-    return render_template('index.html', allTodo=allTodo)
+    #allTodo=Todo.query.all()
+    username = session.get('username', 'Guestsb')  # Get the username from the session, default to 'Guestsb'
+    return render_template('index.html',username=username)
 
 @app.route("/login", methods=['GET','POST'])
 def login():
@@ -64,7 +66,7 @@ def login():
         password=request.form['password']
         if check_auth(username,password):
             session['logged_in']=True
-            session['username']=username #we are storing username in the session to greet user on the my_goals page. 
+            session['username']=username #we are storing username in the session to greet user on the homepage(index.html). 
             flash("Login successful!","success")
             return redirect(url_for('home'))
         else:
@@ -81,8 +83,7 @@ def logout():
 @requires_auth  # Ensure the user is authenticated
 def my_goals():
     allTodo=Todo.query.all()
-    username = session.get('username', 'User')  # Get the username from the session, default to 'User'
-    return render_template('my_goals.html', username=username,allTodo=allTodo)
+    return render_template('my_goals.html',allTodo=allTodo)
 
 @app.route("/add", methods=['POST'])
 @requires_auth # restrict post access to authntic users.
