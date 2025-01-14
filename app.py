@@ -80,8 +80,9 @@ def logout():
 @app.route("/my_goals")
 @requires_auth  # Ensure the user is authenticated
 def my_goals():
+    allTodo=Todo.query.all()
     username = session.get('username', 'User')  # Get the username from the session, default to 'User'
-    return render_template('my_goals.html', username=username)
+    return render_template('my_goals.html', username=username,allTodo=allTodo)
 
 @app.route("/add", methods=['POST'])
 @requires_auth # restrict post access to authntic users.
