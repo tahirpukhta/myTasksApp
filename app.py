@@ -47,12 +47,12 @@ class Todo(db.Model):
         return f"{self.sno} - {self.title}"
 
 #Different Routes
-@app.route("/about")
-def about():
-    return render_template('about.html')
+@app.route("/home")
+def home():
+    return render_template('home.html')
 
 @app.route("/")
-def home():
+def welcome():
     allTodo=Todo.query.all()
     return render_template('index.html', allTodo=allTodo)
 
